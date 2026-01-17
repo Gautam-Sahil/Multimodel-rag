@@ -4,7 +4,28 @@
 <img width="1920" height="1080" alt="Screenshot 2026-01-17 230531" src="https://github.com/user-attachments/assets/54dbabd3-7f4b-459e-be92-91b5b9450145" />
 
 
+<table>
+  <tr>
+    <td align="center">
+      <img width="596" height="600" alt="Screenshot 2026-01-17 230801" src="https://github.com/user-attachments/assets/466d84ec-bcbd-4ab0-bd02-0bcae356b7be" />
+    </td>
+    <td align="center">
+      <img width="594" height="600" alt="Screenshot 2026-01-17 230825" src="https://github.com/user-attachments/assets/9e8df02a-71a8-4540-8af9-77148249c456" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="593" height="600" alt="Screenshot 2026-01-17 230839" src="https://github.com/user-attachments/assets/272f79d8-3a53-414e-815c-2faa389b7f82" />
+    </td>
+    <td align="center">
+      <img width="595" height="600" alt="Screenshot 2026-01-17 230853" src="https://github.com/user-attachments/assets/1c729c94-fd7c-4f7c-be1f-5ff8c0fa3345" />
+    </td>
+  </tr>
+</table>
+
+
 A robust Retrieval-Augmented Generation (RAG) system designed to process complex PDFs containing text, tables, and images.
+
 
 ## 🚀 Vedio Demo
 [Vedio Demo](https://drive.google.com/file/d/1_qYyjUpQB4kaS37vriHyUQVTR4mt8Y1q/view?usp=sharing)
