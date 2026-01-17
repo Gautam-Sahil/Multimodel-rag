@@ -25,7 +25,7 @@
 
 
 
-A robust Retrieval-Augmented Generation (RAG) system designed to process complex PDFs containing text, tables, and images.
+A robust Retrieval-Augmented Generation (RAG) system designed to process complex PDFs containing text, tables, graphs and images.
 
 
 ## 🚀 Vedio Demo
