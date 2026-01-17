@@ -87,7 +87,7 @@ PINECONE_API_KEY=your_pinecone_key
 OPENROUTER_API_KEY=your_openrouter_key
 Initialize the Vector Store:
 
-Bash
+Run these commands:
 
 python store_index.py
 Run the Application:
