@@ -1,5 +1,8 @@
 # Multimodel-rag: Multi-Modal Document Intelligence RAG
 
+
+<img width="1920" height="1080" alt="Screenshot 2026-01-17 230531" src="https://github.com/user-attachments/assets/54dbabd3-7f4b-459e-be92-91b5b9450145" />
+
 A robust Retrieval-Augmented Generation (RAG) system designed to process complex PDFs containing text, tables, and images.
 
 ## 🚀 Features
