@@ -1,27 +1,13 @@
-# Core
 flask==3.0.0
 python-dotenv==1.0.0
-gunicorn==21.2.0
-
-# Document Processing
-pypdf==5.6.1
-pdfplumber==0.11.4
-
-# AI/ML
+gunicorn
+pypdf==5.1.0
 sentence-transformers==3.3.1
-langchain==0.3.0
-langchain-community==0.3.0
-langchain-openai==0.3.0
-langchain-pinecone==0.2.0
-langchain-huggingface==0.3.0
-
-# Vector Database
-pinecone-client==4.2.1
-
-# Optional (for evaluation)
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-openai>=0.3.0
+langchain-pinecone>=0.2.0
+langchain-huggingface>=0.1.0
+pinecone-client>=5.0.1
 pandas==2.2.3
 numpy==1.26.4
-
-# Development
-pytest==8.2.0
-black==24.1.1
