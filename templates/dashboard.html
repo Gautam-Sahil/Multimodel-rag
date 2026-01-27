@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Modal Document Intelligence</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-glow: rgba(37, 99, 235, 0.15);
+            --accent: #10b981;
+            --bg-page: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.9);
+            --border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background: var(--bg-page); 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* --- Global Header --- */
+        .app-header {
+            background: #fff;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .brand { display: flex; align-items: center; gap: 14px; }
+        .brand img { width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--primary); }
+        .brand h1 { font-size: 1.15rem; font-weight: 800; color: var(--text-dark); margin: 0; }
+        .brand p { font-size: 0.75rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin: 0; }
+
+        .active-doc-badge {
+            background: var(--primary-glow);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .pulse { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+        /* --- Main Layout --- */
+        .container { display: flex; flex: 1; padding: 20px; gap: 24px; height: calc(100vh - 70px); }
+
+        /* --- Left Side: Document Control --- */
+        .side-panel { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+
+        .content-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .doc-preview-wrapper { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+        .pdf-thumb { width: 100px; height: 130px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); transition: transform 0.3s ease; }
+        .pdf-thumb:hover { transform: scale(1.05); }
+
+        .doc-details h2 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text-dark); }
+        .doc-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .meta-tag { font-size: 0.75rem; background: var(--bg-page); padding: 8px; border-radius: 8px; color: var(--text-light); }
+        .meta-tag strong { color: var(--text-dark); display: block; }
+
+        .btn-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-view:hover { background: #1e40af; box-shadow: 0 5px 15px var(--primary-glow); }
+
+        /* --- Suggested Queries (The Cool Cards) --- */
+        .query-label { font-size: 0.8rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; margin-bottom: 12px; display: block; }
+        .query-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .query-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            text-align: left;
+        }
+        .query-card:hover { border-color: var(--primary); background: #f0f7ff; transform: translateX(6px); }
+        .query-card i { color: var(--primary); font-size: 1rem; }
+
+        /* --- Right Side: Chat Interface --- */
+        .chat-panel { flex: 1.2; display: flex; flex-direction: column; background: #fff; border-radius: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-soft); overflow: hidden; }
+
+        .chat-body { flex: 1; padding: 24px; overflow-y: auto; background: #ffffff; display: flex; flex-direction: column; gap: 16px; }
+
+        /* Message Bubbles */
+        .msg { display: flex; width: 100%; flex-direction: column; }
+        .msg.user { align-items: flex-end; }
+        .msg.bot { align-items: flex-start; }
+
+        .bubble {
+            max-width: 85%;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border-radius: 18px;
+        }
+        .user .bubble { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px var(--primary-glow); }
+        .bot .bubble { background: #f1f5f9; color: var(--text-dark); border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
+
+        /* AI Formatting (Bold, Headings, Lists) */
+        .bubble strong { font-weight: 700; color: var(--text-dark); }
+        .user .bubble strong { color: #fff; }
+        .bubble h3 { margin: 15px 0 8px; font-size: 1.05rem; font-weight: 700; }
+        .bubble ul { margin: 10px 0 10px 20px; }
+        .bubble li { margin-bottom: 5px; }
+        .bubble p { margin-bottom: 10px; }
+
+        /* Chat Footer */
+        .chat-footer { padding: 20px; background: #fff; border-top: 1px solid var(--border); }
+        .input-bar {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+        .input-bar:focus-within { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px var(--primary-glow); }
+        .input-bar input { flex: 1; border: none; outline: none; background: transparent; font-size: 0.95rem; color: var(--text-dark); padding: 10px 5px; }
+        
+        .send-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .send-btn:hover { transform: translateY(-2px); background: #1d4ed8; }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='beyond.png') }}" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103633.png'">
+            <div>
+                <h1>Multi-Modal Document Intelligence</h1>
+                <p>AI-Powered Text, Table & Image Analysis</p>
+            </div>
+        </div>
+        
+        <div class="active-doc-badge">
+            <div class="pulse"></div>
+            Analyzing: qatar_test_doc.pdf
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="side-panel">
+            <div class="content-card">
+                <div class="doc-preview-wrapper">
+                    <img src="{{ url_for('static', filename='pdf-thumbnail.jpg') }}" class="pdf-thumb" alt="PDF" onerror="this.src='https://cdn-icons-png.flaticon.com/512/337/337946.png'">
+                    <div class="doc-details">
+                        <h2>qatar_test_doc.pdf</h2>
+                        <span style="font-size: 0.8rem; color: var(--text-light);">IMF Article IV Consultation</span>
+                        
+                        <div class="doc-meta-grid">
+                            <div class="meta-tag"><strong>Pages</strong> 78</div>
+                            <div class="meta-tag"><strong>Size</strong> 5.2 MB</div>
+                            <div class="meta-tag"><strong>Type</strong> Report</div>
+                            <div class="meta-tag"><strong>Index</strong> 356 Chunks</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('static', filename='qatar_test_doc.pdf') }}" target="_blank" class="btn-view">
+                    <i class="fas fa-external-link-alt"></i> Open PDF in New Tab
+                </a>
+            </div>
+
+            <div class="content-card" style="flex: 1;">
+                <span class="query-label"><i class="fas fa-bolt"></i> Quick Insights</span>
+                <div class="query-grid">
+                    <button class="query-card" onclick="fillInput('Summarize the executive summary of this document')">
+                        <i class="fas fa-file-invoice"></i> Summarize Executive Summary
+                    </button>
+                    <button class="query-card" onclick="fillInput('Explain What Figure 3: External Sector Developments indicates')">
+                        <i class="fas fa-chart-area"></i> Explain What these figures indicate
+                    </button>
+                    <button class="query-card" onclick="fillInput('What is Annex II. External Sector Assessment?  Explain it')">
+                        <i class="fas fa-clipboard-list"></i> Discuss Annex II findings
+                    </button>
+                    <button class="query-card" onclick="fillInput('Extract the numbers and information from Table 3a. Qatar: Summary of Central Government Finance, 2020–29')">
+                        <i class="fas fa-table"></i> Get GDP Growth Tables
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-panel">
+            <div id="chat-box" class="chat-body">
+                <div class="msg bot">
+                    <div class="bubble">
+                        <strong>System Initialized</strong><br>
+                       <strong>Welcome to the Multi-Modal Document Assistant</strong><br>
+                     I can analyze documents containing text, tables, and visual elements.<br><br>
+                     You can ask questions such as:<br>
+                    • "Give me a summary of this document."<br>
+                    • "Explain the chart mentioned in the report."<br>
+                    • "Summarize the key findings."
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-footer">
+                <form id="chat-form" class="input-bar">
+                    <input type="text" id="user-query" placeholder="Ask about your documents..." autocomplete="off" required>
+                    <button type="submit" class="send-btn" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            marked.setOptions({ breaks: true, gfm: true });
+            let isTyping = false;
+
+            window.fillInput = function(text) {
+                const input = $("#user-query");
+                input.val(""); 
+                let i = 0;
+                // Cool typing effect for the fill
+                function type() {
+                    if (i < text.length) {
+                        input.val(input.val() + text.charAt(i));
+                        i++;
+                        setTimeout(type, 15);
+                    }
+                }
+                type();
+                input.focus();
+            };
+
+            $("#chat-form").on("submit", function(e) {
+                e.preventDefault();
+                if (isTyping) return;
+
+                const query = $("#user-query").val().trim();
+                if (!query) return;
+
+                $("#chat-box").append(`<div class="msg user"><div class="bubble">${query}</div></div>`);
+                $("#user-query").val("");
+                scrollChat();
+
+                const loadingId = "load-" + Date.now();
+                $("#chat-box").append(`<div class="msg bot" id="${loadingId}"><div class="bubble"><i class="fas fa-circle-notch fa-spin"></i> Analyzing multi-modal data...</div></div>`);
+                scrollChat();
+
+                isTyping = true;
+                $("#send-btn").prop("disabled", true).css("opacity", "0.6");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/get",
+                    data: { msg: query },
+                    success: function(response) {
+    // 1. Remove the loading bubble immediately
+    $(`#${loadingId}`).remove();
+    isTyping = false; 
+    $("#send-btn").prop("disabled", false).css("opacity", "1");
+
+    if (response.error) {
+        $("#chat-box").append(`<div class="msg bot"><div class="bubble" style="color:#ef4444;">${response.error}</div></div>`);
+        return;
+    }
+
+    // 2. Parse the AI's answer
+    let rawAnswer = response.answer || "No response received.";
+    let htmlContent = marked.parse(rawAnswer);
+    
+    // 3. Handle the Sources (Professional UI)
+    if (response.sources && response.sources.length > 0) {
+        htmlContent += `<div style="margin-top:15px; padding-top:10px; border-top:1px solid #e2e8f0;">
+            <p style="font-size:0.7rem; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Verified Sources</p>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">`;
+            
+        response.sources.forEach(src => {
+            htmlContent += `<span style="background:#f1f5f9; color:#475569; padding:3px 10px; border-radius:6px; font-size:0.75rem; border:1px solid #e2e8f0; font-weight:600;">${src}</span>`;
+        });
+        
+        htmlContent += `</div></div>`;
+    }
+    
+    // 4. Update the UI
+    $("#chat-box").append(`<div class="msg bot"><div class="bubble">${htmlContent}</div></div>`);
+    scrollChat();
+},
+                    error: function() {
+                        $(`#${loadingId}`).remove();
+                        $("#chat-box").append(`<div class="msg bot"><div class="bubble" style="color:#ef4444;">Error: Connection lost.</div></div>`);
+                    },
+                    complete: function() {
+                        isTyping = false;
+                        $("#send-btn").prop("disabled", false).css("opacity", "1");
+                    }
+                });
+            });
+
+            function scrollChat() {
+                const box = $("#chat-box");
+                box.animate({ scrollTop: box[0].scrollHeight }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

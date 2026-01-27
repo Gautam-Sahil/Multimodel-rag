@@ -216,6 +216,30 @@ border-radius: 0 0 15px 15px !important;
 	cursor: pointer;
 	background-color: rgba(0,0,0,0.2);
 }
+
+.sample-questions {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 5px;
+}
+
+.sample-btn {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    text-align: left;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.sample-btn:hover {
+    background: #e3f2fd;
+}
+
 @media(max-width: 576px){
 	.contacts_card{
 	margin-bottom: 15px !important;
