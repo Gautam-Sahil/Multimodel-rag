@@ -150,5 +150,6 @@ def health():
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
 
 if __name__ == "__main__":
-    print("🚀 Starting Multi-Modal RAG System on port 8080...")
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    # Hugging Face uses port 7860 by default
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port)
