@@ -2,12 +2,12 @@ import os
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 
-# LangChain & Vector Store
+# LangChain Modern Core Imports
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import ChatOpenAI
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 # Custom Modules
 from src.helper import download_hugging_face_embeddings
@@ -26,9 +26,10 @@ try:
         index_name=INDEX_NAME,
         embedding=embeddings
     )
+    # Using k=12 as per your requirement for better context
     retriever = docsearch.as_retriever(
         search_type="similarity", 
-        search_kwargs={"k": 12}  # Increased k for better context
+        search_kwargs={"k": 12}
     )
     print(f"✅ Connected to Pinecone index: {INDEX_NAME}")
 except Exception as e:
@@ -56,30 +57,37 @@ CRITICAL INSTRUCTIONS:
 - ANALYZE trends (growth, decline, stability).
 - CITE SOURCES explicitly within the text when possible.
 
-CONTEXT PROVIDED:
+CONTEXT:
 {context}
 
-USER QUESTION: {input}
+QUESTION: {question}
 
 YOUR ANSWER:"""
 
-# --- 3. RAG Chain Setup ---
+# --- 3. RAG Chain Setup (LCEL Style) ---
 chat_model = ChatOpenAI(
-    model_name="openai/gpt-4o-mini", 
+    model="openai/gpt-4o-mini", 
     openai_api_base="https://openrouter.ai/api/v1",
     openai_api_key=os.getenv("OPENROUTER_API_KEY"),
     temperature=0.1,
     max_tokens=800
 )
 
+# Helper function to format retrieved documents into a single string
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
+# The modern LCEL Chain
 if retriever:
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", MULTIMODAL_SYSTEM_PROMPT),
-        ("human", "{input}"),
-    ])
-    question_answer_chain = create_stuff_documents_chain(chat_model, prompt)
-    rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-    print("✅ RAG chain initialized successfully")
+    prompt = ChatPromptTemplate.from_template(MULTIMODAL_SYSTEM_PROMPT)
+    
+    rag_chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt
+        | chat_model
+        | StrOutputParser()
+    )
+    print("✅ LCEL RAG chain initialized successfully")
 else:
     rag_chain = None
     print("⚠️ RAG chain not initialized due to missing retriever")
@@ -97,25 +105,21 @@ def chat():
         if not msg:
             return jsonify({"error": "No message received"}), 400
         
-        print(f"📩 Incoming Query: {msg}")
-        
         if rag_chain is None:
             return jsonify({
                 "answer": "System is currently initializing or Pinecone is disconnected.",
                 "sources": []
             })
         
-        # Invoke RAG Chain
-        response = rag_chain.invoke({"input": msg})
-        answer = response.get("answer", "I couldn't generate an answer based on the document.")
-        retrieved_docs = response.get("context", [])
+        # 1. Manually get docs first so we can extract sources for CitationManager
+        retrieved_docs = retriever.invoke(msg)
         
-        # Use CitationManager to extract and clean unique sources
+        # 2. Invoke the chain for the answer
+        answer = rag_chain.invoke(msg)
+        
+        # 3. Process sources using your existing CitationManager
         unique_sources = CitationManager.get_unique_sources(retrieved_docs)
         
-        # Log for debugging
-        print(f"🔍 Found {len(unique_sources)} unique sources.")
-
         return jsonify({
             "answer": answer,
             "sources": unique_sources,
@@ -132,24 +136,20 @@ def chat():
 
 @app.route("/health", methods=["GET"])
 def health():
-    """Detailed health check endpoint"""
     from pinecone import Pinecone
     try:
         pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-        indexes = pc.list_indexes().names()
+        indexes = [idx.name for idx in pc.list_indexes()]
         pinecone_ok = INDEX_NAME in indexes
         
         return jsonify({
             "status": "healthy" if rag_chain and pinecone_ok else "degraded",
             "pinecone_connection": "connected" if pinecone_ok else "disconnected",
-            "index_name": INDEX_NAME,
-            "rag_chain_status": "ready" if rag_chain else "initializing",
-            "environment": os.getenv("FLASK_ENV", "production")
+            "rag_chain_status": "ready" if rag_chain else "initializing"
         })
     except Exception as e:
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Hugging Face uses port 7860 by default
     port = int(os.environ.get("PORT", 7860))
     app.run(host="0.0.0.0", port=port)
