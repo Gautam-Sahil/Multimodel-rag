@@ -27,6 +27,10 @@
 
 A robust Retrieval-Augmented Generation (RAG) system designed to process complex PDFs containing text, tables, graphs and images.
 
+## 🚀 Live Demo
+[Live Demo 1](https://huggingface.co/spaces/GautamxSahil/multimodal-rag-system)
+[Live Demo 2](https://multimodel-rag-orz5.onrender.com/)
+
 
 ## 🚀 Vedio Demo
 [Vedio Demo](https://drive.google.com/file/d/1_qYyjUpQB4kaS37vriHyUQVTR4mt8Y1q/view?usp=sharing)
