@@ -29,6 +29,7 @@ A robust Retrieval-Augmented Generation (RAG) system designed to process complex
 
 ## 🚀 Live Demo
 [Live Demo 1](https://huggingface.co/spaces/GautamxSahil/multimodal-rag-system)
+
 [Live Demo 2](https://multimodel-rag-orz5.onrender.com/)
 
 
